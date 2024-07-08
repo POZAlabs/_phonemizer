@@ -14,3 +14,7 @@ paper/*
 *.~undo-tree~
 
 docs/build
+.venv
+tmp*
+.DS_Store
+.python-version
