@@ -14,20 +14,17 @@
 # along with phonemizer. If not, see <http://www.gnu.org/licenses/>.
 """Low-level bindings to the espeak API"""
 
-import atexit
 import ctypes
 import pathlib
 import shutil
 import sys
 import tempfile
-import weakref
-from ctypes import CDLL
 from pathlib import Path
 from typing import Union
 
 from phonemizer.backend.espeak.voice import EspeakVoice
 
-if sys.platform != 'win32':
+if sys.platform != "win32":
     # cause a crash on Windows
     import dlinfo
 
@@ -55,28 +52,15 @@ class EspeakAPI:
         try:
             # load the original library in order to retrieve its full path?
             # Forced as str as it is required on Windows.
-            espeak: CDLL = ctypes.cdll.LoadLibrary(str(library))
+            espeak: ctypes.CDLL = ctypes.cdll.LoadLibrary(str(library))
             library_path = self._shared_library_path(espeak)
             del espeak
         except OSError as error:
-            raise RuntimeError(
-                f'failed to load espeak library: {str(error)}') from None
+            raise RuntimeError(f"failed to load espeak library: {str(error)}") from None
 
-        # will be automatically destroyed after use
         self._tempdir = tempfile.mkdtemp()
 
-        # properly exit when the wrapper object is destroyed (see
-        # https://docs.python.org/3/library/weakref.html#comparing-finalizers-with-del-methods).
-        # But... weakref implementation does not work on windows so we register
-        # the cleanup with atexit. This means that, on Windows, all the
-        # temporary directories created by EspeakAPI instances will remain on
-        # disk until the Python process exit.
-        if sys.platform == 'win32':  # pragma: nocover
-            atexit.register(self._delete_win32)
-        else:
-            weakref.finalize(self, self._delete, self._library, self._tempdir)
-
-        espeak_copy = pathlib.Path(self._tempdir) / library_path.name
+        espeak_copy = pathlib.Path(self._tempdir).joinpath(library_path.name)
         shutil.copy(library_path, espeak_copy, follow_symlinks=False)
 
         # finally load the library copy and initialize it. 0x02 is
@@ -85,39 +69,14 @@ class EspeakAPI:
         try:
             if self._library.espeak_Initialize(0x02, 0, None, 0) <= 0:
                 raise RuntimeError(  # pragma: nocover
-                    'failed to initialize espeak shared library')
+                    "failed to initialize espeak shared library"
+                )
         except AttributeError:  # pragma: nocover
-            raise RuntimeError(
-                'failed to load espeak library') from None
+            raise RuntimeError("failed to load espeak library") from None
 
         # the path to the original one (the copy is considered an
         # implementation detail and is not exposed)
         self._library_path = library_path
-
-    def _delete_win32(self):  # pragma: nocover
-        # Windows does not support static methods with ctypes libraries
-        # (library == None) so we use a proxy method...
-        self._delete(self._library, self._tempdir)
-
-    @staticmethod
-    def _delete(library, tempdir):
-        try:
-            # clean up the espeak library allocated memory
-            library.espeak_Terminate()
-        except AttributeError:  # library not loaded
-            pass
-
-        # on Windows it is required to unload the library or the .dll file
-        # cannot be erased from the temporary directory
-        if sys.platform == 'win32':  # pragma: nocover
-            # pylint: disable=import-outside-toplevel
-            # pylint: disable=protected-access
-            # pylint: disable=no-member
-            import _ctypes
-            _ctypes.FreeLibrary(library._handle)
-
-        # clean up the tempdir containing the copy of the library
-        shutil.rmtree(tempdir)
 
     @property
     def library_path(self):
@@ -142,7 +101,8 @@ class EspeakAPI:
             return pathlib.Path(dlinfo.DLInfo(library).path).resolve()
         except (Exception, ImportError):  # pragma: nocover
             raise RuntimeError(
-                f'failed to retrieve the path to {library} library') from None
+                f"failed to retrieve the path to {library} library"
+            ) from None
 
     def info(self):
         """Bindings to espeak_Info
@@ -173,8 +133,7 @@ class EspeakAPI:
         """
         f_list_voices = self._library.espeak_ListVoices
         f_list_voices.argtypes = [ctypes.POINTER(EspeakVoice.VoiceStruct)]
-        f_list_voices.restype = ctypes.POINTER(
-            ctypes.POINTER(EspeakVoice.VoiceStruct))
+        f_list_voices.restype = ctypes.POINTER(ctypes.POINTER(EspeakVoice.VoiceStruct))
         return f_list_voices(name)
 
     def set_voice_by_name(self, name) -> int:
@@ -225,11 +184,12 @@ class EspeakAPI:
         f_text_to_phonemes.argtypes = [
             ctypes.POINTER(ctypes.c_char_p),
             ctypes.c_int,
-            ctypes.c_int]
+            ctypes.c_int,
+        ]
         return f_text_to_phonemes(text_ptr, text_mode, phonemes_mode)
 
     def set_phoneme_trace(self, mode, file_pointer):
-        """"Bindings on espeak_SetPhonemeTrace
+        """ "Bindings on espeak_SetPhonemeTrace
 
         This method must be called before any call to synthetize()
 
@@ -241,9 +201,7 @@ class EspeakAPI:
 
         """
         f_set_phoneme_trace = self._library.espeak_SetPhonemeTrace
-        f_set_phoneme_trace.argtypes = [
-            ctypes.c_int,
-            ctypes.c_void_p]
+        f_set_phoneme_trace.argtypes = [ctypes.c_int, ctypes.c_void_p]
         f_set_phoneme_trace(mode, file_pointer)
 
     def synthetize(self, text_ptr, size, mode):
@@ -271,5 +229,9 @@ class EspeakAPI:
             ctypes.c_int,  # position_type
             ctypes.c_uint,
             ctypes.POINTER(ctypes.c_uint),
-            ctypes.c_void_p]
+            ctypes.c_void_p,
+        ]
         return f_synthetize(text_ptr, size, 0, 1, 0, mode, None, None)
+
+    def cleanup(self):
+        shutil.rmtree(self._tempdir)

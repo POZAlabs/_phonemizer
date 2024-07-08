@@ -1,0 +1,38 @@
+[tool.poetry]
+name = "phonemizer"
+version = "3.2.1"
+description = "Simple text to phones converter for multiple languages"
+authors = ["pozalabs <contact@pozalabs.com>"]
+license = "GPL3"
+readme = "README.md"
+packages = [{ include = "phonemizer" }]
+keywords = ["linguistics", "G2P", "phone", "festival", "espeak", "TTS"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Operating System :: OS Independent",
+]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+dlinfo = "^1.2.1"
+attrs = ">=18.1"
+typing-extensions = "^4.12.2"
+joblib = "^1.4.2"
+segments = "^2.2.1"
+
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^3.7.1"
+pytest = "^8.2.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore::DeprecationWarning:.*segments.*",
+    "ignore::DeprecationWarning:.*csvw.*",
+    "ignore::DeprecationWarning:.*clldutils.*",
+]
