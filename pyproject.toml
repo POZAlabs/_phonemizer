@@ -5,12 +5,7 @@ description = "Simple text to phones converter for multiple languages"
 authors = ["pozalabs <contact@pozalabs.com>"]
 license = "GPL3"
 readme = "README.md"
-packages = [
-    { include = "phonemizer" },
-    { include = "share/espeak/*", from = "phonemizer" },
-    { include = "share/festival/*", from = "phonemizer" },
-    { include = "share/segments/*", from = "phonemizer" },
-]
+packages = [{ include = "phonemizer" }]
 keywords = ["linguistics", "G2P", "phone", "festival", "espeak", "TTS"]
 classifiers = [
     "Programming Language :: Python :: 3",
