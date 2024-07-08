@@ -19,8 +19,6 @@ from numbers import Number
 from pathlib import Path
 from typing import Union, List, Tuple, Iterable
 
-import pkg_resources
-
 
 def cumsum(iterable: Iterable[Number]) -> List[Number]:
     """Returns the cumulative sum of the `iterable` as a list"""
@@ -46,8 +44,7 @@ def list2str(text: Union[str, List[str]]) -> str:
     return os.linesep.join(text)
 
 
-def chunks(text: Union[str, List[str]], num: int) \
-        -> Tuple[List[List[str]], List[int]]:
+def chunks(text: Union[str, List[str]], num: int) -> Tuple[List[List[str]], List[int]]:
     """Return a maximum of `num` equally sized chunks of a `text`
 
     This method is usefull when phonemizing a single text on multiple jobs.
@@ -76,10 +73,9 @@ def chunks(text: Union[str, List[str]], num: int) \
     size = int(max(1, len(text) / num))  # noqa
     nchunks = min(num, len(text))
 
-    text_chunks = [
-        text[i * size:(i + 1) * size] for i in range(nchunks - 1)]
+    text_chunks = [text[i * size : (i + 1) * size] for i in range(nchunks - 1)]
 
-    last = text[(nchunks - 1) * size:]
+    last = text[(nchunks - 1) * size :]
     if last:
         text_chunks.append(last)
 
@@ -108,13 +104,10 @@ def get_package_resource(path: str) -> Path:
     The absolute path to the required resource as a `pathlib.Path`
 
     """
-    path = Path(
-        pkg_resources.resource_filename(
-            pkg_resources.Requirement.parse('phonemizer'),
-            f'phonemizer/share/{path}'))
+    path = Path(__file__).parent.joinpath("share", path).resolve()
 
     if not path.exists():  # pragma: nocover
-        raise ValueError(f'the requested resource does not exist: {path}')
+        raise ValueError(f"the requested resource does not exist: {path}")
 
     return path.resolve()
 
@@ -126,4 +119,4 @@ def version_as_tuple(version: str) -> Tuple[int, ...]:
     from '1.2.3' or (0, 2) from '0.2-dev'
 
     """
-    return tuple(int(v) for v in version.replace('-dev', '').split('.'))
+    return tuple(int(v) for v in version.replace("-dev", "").split("."))

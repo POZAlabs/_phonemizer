@@ -13,10 +13,6 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 
-
-[tool.poetry.scripts]
-phonemizer = "phonemizer.main:main"
-
 [tool.poetry.dependencies]
 python = "^3.11"
 dlinfo = "^1.2.1"
