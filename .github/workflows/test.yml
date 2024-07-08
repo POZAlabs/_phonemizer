@@ -7,19 +7,45 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+        espeak-version: ["1.48.15", "1.51.1"]
+
+    name: Python ${{ matrix.python-version }} / Espeak ${{ matrix.espeak-version }}
+
     steps:
       - uses: actions/checkout@v4
 
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install espeak-ng festival mbrola mbrola-fr1
+          sudo apt-get install festival mbrola mbrola-fr1 mbrola-af1
+
+      - name: Install espeak 1.48
+        if: ${{ matrix.espeak-version == '1.48.15' }}
+        run: sudo apt-get install espeak
+
+      - name: Install espeak>=1.49
+        if: ${{ matrix.espeak-version != '1.48.15' }}
+        env:
+          ESPEAK_VERSION: ${{ matrix.espeak-version }}
+        run: |
+          sudo apt-get install make autoconf automake libtool pkg-config gcc libsonic-dev libpcaudio-dev git
+          git clone --depth 1 --branch $ESPEAK_VERSION https://github.com/espeak-ng/espeak-ng.git
+          cd espeak-ng
+          ./autogen.sh
+          ./configure
+          make src/espeak-ng
+          sudo make install
+          sudo ldconfig
+          espeak --version
 
       - name: Set up Python
         uses: actions/setup-python@v5
         id: setup-python
         with:
-          python-version: 3.11
+          python-version: ${{ matrix.python-version }}
           cache: pip
 
       - name: Load cached poetry installation
