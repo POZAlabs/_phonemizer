@@ -46,9 +46,6 @@ class BaseEspeakBackend(BaseBackend):
             logger=logger,
         )
 
-        self._espeak: EspeakWrapper | None = None
-
-    def initialize(self):
         self._espeak = EspeakWrapper()
         self.logger.debug("loaded %s", self._espeak.library_path)
 
@@ -57,7 +54,6 @@ class BaseEspeakBackend(BaseBackend):
         self._espeak = None
 
     def __enter__(self) -> Self:
-        self.initialize()
         return self
 
     def __exit__(

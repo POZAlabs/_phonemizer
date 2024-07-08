@@ -59,6 +59,7 @@ class EspeakBackend(BaseEspeakBackend):
             logger=logger,
         )
 
+        self._espeak.set_voice(self.language)
         self._with_stress = with_stress
         self._tie = self._init_tie(tie)
         self._lang_switch: BaseLanguageSwitch = get_language_switch_processor(
@@ -67,10 +68,6 @@ class EspeakBackend(BaseEspeakBackend):
         self._words_mismatch: BaseWordsMismatch = get_words_mismatch_processor(
             words_mismatch, self.logger
         )
-
-    def initialize(self) -> None:
-        super().initialize()
-        self._espeak.set_voice(self.language)
 
     @staticmethod
     def _init_tie(tie) -> Optional[str]:
