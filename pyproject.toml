@@ -7,9 +7,9 @@ license = "GPL3"
 readme = "README.md"
 packages = [
     { include = "phonemizer" },
-    { include = "share/espeak/*" },
-    { include = "share/festival/*" },
-    { include = "share/segments/*" },
+    { include = "share/espeak/*", from = "phonemizer" },
+    { include = "share/festival/*", from = "phonemizer" },
+    { include = "share/segments/*", from = "phonemizer" },
 ]
 keywords = ["linguistics", "G2P", "phone", "festival", "espeak", "TTS"]
 classifiers = [
