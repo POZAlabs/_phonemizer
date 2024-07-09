@@ -13,6 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with phonologizer. If not, see <http://www.gnu.org/licenses/>.
 
-from . import phonemize
+from .phonemize import phonemize
 
 __all__ = ["phonemize"]
