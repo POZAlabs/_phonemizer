@@ -12,25 +12,3 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with phonologizer. If not, see <http://www.gnu.org/licenses/>.
-"""Multilingual text to phones converter"""
-
-
-__version__ = '3.2.1'
-"""Phonemizer version"""
-
-
-try:  # pragma: nocover
-    # This variable is injected in the __builtins__ by the build process. In
-    # that case we don't want to import phonemize as there are missing
-    # dependencies.
-    __PHONEMIZER_SETUP__
-except NameError:
-    __PHONEMIZER_SETUP__ = False
-
-
-if __PHONEMIZER_SETUP__:  # pragma: nocover
-    import sys
-    sys.stderr.write(
-        'Partial import of phonemizer during the build process.\n')
-else:
-    from .phonemize import phonemize  # pylint: disable=unused-import
