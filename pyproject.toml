@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "phonemizer"
+name = "pozalabs-phonemizer"
 version = "3.2.1"
 description = "Simple text to phones converter for multiple languages"
 authors = ["pozalabs <contact@pozalabs.com>"]
